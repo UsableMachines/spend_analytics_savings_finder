@@ -1,0 +1,63 @@
+{% extends "layouts/base.html" %}
+{% block title %}Analysis{% endblock %}
+{% block page_title %}Analysis{% endblock %}
+
+{% block help_title %}Analysis Help{% endblock %}
+{% block help_content %}
+<h3>What is this page?</h3>
+<p>View past AI-powered analysis runs and their results. Each run sends your spend data to the Kindo agent for analysis.</p>
+<h3>Analysis types</h3>
+<ul>
+  <li><strong>Analyze</strong> — comprehensive spend analysis looking for savings, consolidation, and leakage.</li>
+  <li><strong>Recommend</strong> — AI generates prioritized recommendations.</li>
+  <li><strong>Validate</strong> — checks data quality and compliance.</li>
+  <li><strong>Enrich</strong> — augments spend data with additional categorization.</li>
+</ul>
+{% endblock %}
+
+{% block content %}
+{% if not agent_configured %}
+<div class="config-notice">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+  <div>
+    <strong>Configuration Required</strong>
+    <p style="font-size:13px;margin-top:4px;">Set <code>KINDO_API_TOKEN</code> and <code>KINDO_AGENT_ID</code> environment variables to run AI analysis.</p>
+  </div>
+</div>
+{% else %}
+<div style="margin-bottom:16px">
+  <a href="{{ url_for('analysis.analysis_run') }}" class="btn btn-primary">+ New Analysis</a>
+</div>
+{% endif %}
+
+{% if runs %}
+<div class="card">
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>ID</th><th>Type</th><th>Status</th><th>Risk Level</th><th>Score</th><th>Date</th><th>Actions</th></tr></thead>
+      <tbody>
+      {% for r in runs %}
+      <tr>
+        <td>#{{ r.id }}</td>
+        <td>{{ r.run_type }}</td>
+        <td><span class="badge {{ 'badge-success' if r.status == 'completed' else ('badge-warning' if r.status == 'running' else 'badge-danger') }}">{{ r.status }}</span></td>
+        <td>{% if r.risk_level %}<span class="badge sev-{{ r.risk_level }}">{{ r.risk_level }}</span>{% else %}—{% endif %}</td>
+        <td>{{ "%.1f"|format(r.score) if r.score else "—" }}</td>
+        <td>{{ r.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+        <td><a href="{{ url_for('analysis.analysis_detail', rid=r.id) }}" class="btn btn-sm">View</a></td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% else %}
+<div class="empty-state">
+  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+  <p>No analysis runs yet.</p>
+  {% if agent_configured %}
+  <a href="{{ url_for('analysis.analysis_run') }}" class="btn btn-primary">Run Your First Analysis</a>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

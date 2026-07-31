@@ -1,0 +1,126 @@
+{% extends "layouts/base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block help_title %}Dashboard Help{% endblock %}
+{% block help_content %}
+<h3>What is this page?</h3>
+<p>The Dashboard provides a high-level overview of your procurement spend, supplier base, contract portfolio, and maverick purchasing activity.</p>
+<h3>Key metrics</h3>
+<ul>
+  <li><strong>Total Spend</strong> — aggregate of all recorded spend transactions.</li>
+  <li><strong>Suppliers</strong> — number of active suppliers in your tenant.</li>
+  <li><strong>Contracts</strong> — total contract count.</li>
+  <li><strong>Maverick Spend</strong> — transactions flagged as off-contract or non-compliant.</li>
+</ul>
+<h3>Charts</h3>
+<p>Spend by Category and Top Suppliers show how your budget is distributed. Use the Analysis module to get AI-powered savings recommendations.</p>
+{% endblock %}
+
+{% block content %}
+{% if not agent_configured %}
+<div class="config-notice">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+  <div>
+    <strong>Kindo Agent Not Configured</strong>
+    <p style="font-size:13px;margin-top:4px;">Set <code>KINDO_API_TOKEN</code> and <code>KINDO_AGENT_ID</code> environment variables to enable AI-powered spend analysis.</p>
+  </div>
+</div>
+{% endif %}
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+    </div>
+    <div class="stat-label">Total Spend</div>
+    <div class="stat-value">${{ "{:,.2f}".format(total_spend) }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+    </div>
+    <div class="stat-label">Suppliers</div>
+    <div class="stat-value">{{ supplier_count }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    </div>
+    <div class="stat-label">Contracts</div>
+    <div class="stat-value">{{ contract_count }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    </div>
+    <div class="stat-label">Maverick Transactions</div>
+    <div class="stat-value">{{ maverick_count }}</div>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-header"><h2>Spend by Category</h2></div>
+    {% if spend_by_cat %}
+    <div class="bar-chart">
+      {% set max_cat = spend_by_cat|map(attribute=1)|max %}
+      {% for name, amount in spend_by_cat %}
+      <div class="bar-row">
+        <div class="bar-label">{{ name or "Uncategorized" }}</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:{{ (amount / max_cat * 100)|round(1) if max_cat else 0 }}%">${{ "{:,.0f}".format(amount) }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="chart-placeholder">No spend data yet. <a href="{{ url_for('spend.spend_add') }}">Add records</a></div>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <div class="card-header"><h2>Top Suppliers by Spend</h2></div>
+    {% if spend_by_supplier %}
+    <div class="bar-chart">
+      {% set max_sup = spend_by_supplier|map(attribute=1)|max %}
+      {% for name, amount in spend_by_supplier %}
+      <div class="bar-row">
+        <div class="bar-label">{{ name }}</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:{{ (amount / max_sup * 100)|round(1) if max_sup else 0 }}%">${{ "{:,.0f}".format(amount) }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="chart-placeholder">No supplier data yet.</div>
+    {% endif %}
+  </div>
+</div>
+
+{% if recent_analyses %}
+<div class="card" style="margin-top:20px">
+  <div class="card-header">
+    <h2>Recent Analyses</h2>
+    <a href="{{ url_for('analysis.analysis_list') }}" class="btn btn-sm">View All</a>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Type</th><th>Status</th><th>Risk</th><th>Score</th><th>Date</th></tr></thead>
+      <tbody>
+      {% for r in recent_analyses %}
+      <tr onclick="location.href='{{ url_for('analysis.analysis_detail', rid=r.id) }}'" style="cursor:pointer">
+        <td>{{ r.run_type }}</td>
+        <td><span class="badge {{ 'badge-success' if r.status == 'completed' else 'badge-danger' }}">{{ r.status }}</span></td>
+        <td>{% if r.risk_level %}<span class="badge sev-{{ r.risk_level }}">{{ r.risk_level }}</span>{% else %}—{% endif %}</td>
+        <td>{{ "%.1f"|format(r.score) if r.score else "—" }}</td>
+        <td>{{ r.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "layouts/base.html" %}
+{% block title %}Contracts{% endblock %}
+{% block page_title %}Contracts{% endblock %}
+
+{% block help_title %}Contracts Help{% endblock %}
+{% block help_content %}
+<h3>What is this page?</h3>
+<p>Manage supplier contracts. Track start/end dates, total values, and link spend records to detect contract leakage.</p>
+<h3>Contract leakage</h3>
+<p>Leakage occurs when purchases are made at non-contracted rates or from non-contracted suppliers. Linking spend records to contracts helps the AI analysis detect these issues.</p>
+{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+  <div></div>
+  <a href="{{ url_for('contracts.contract_add') }}" class="btn btn-primary">+ Add Contract</a>
+</div>
+
+{% if contracts %}
+<div class="card">
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Title</th><th>Supplier</th><th>Start</th><th>End</th><th>Value</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>
+      {% for c in contracts %}
+      <tr>
+        <td><strong>{{ c.title }}</strong></td>
+        <td>{{ c.supplier.name if c.supplier else '—' }}</td>
+        <td>{{ c.start_date.strftime('%Y-%m-%d') if c.start_date else '—' }}</td>
+        <td>{{ c.end_date.strftime('%Y-%m-%d') if c.end_date else '—' }}</td>
+        <td style="text-align:right">${{ "{:,.2f}".format(c.total_value) }}</td>
+        <td><span class="badge {{ 'badge-success' if c.status == 'active' else 'badge-muted' }}">{{ c.status }}</span></td>
+        <td>
+          <a href="{{ url_for('contracts.contract_edit', cid=c.id) }}" class="btn btn-sm">Edit</a>
+          <form method="POST" action="{{ url_for('contracts.contract_delete', cid=c.id) }}" style="display:inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-sm btn-danger" onclick="return confirm('Delete this contract?')">Del</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% else %}
+<div class="empty-state">
+  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+  <p>No contracts added yet.</p>
+  <a href="{{ url_for('contracts.contract_add') }}" class="btn btn-primary">Add Your First Contract</a>
+</div>
+{% endif %}
+{% endblock %}

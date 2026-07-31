@@ -1,0 +1,30 @@
+{% extends "layouts/base.html" %}
+{% block title %}Run Analysis{% endblock %}
+{% block page_title %}Run Analysis{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:600px">
+  <h2 style="margin-bottom:16px">Start AI Analysis</h2>
+  <p style="font-size:13px;color:var(--color-text-muted);margin-bottom:20px">
+    Select an analysis type to send your spend data to the Kindo AI agent for processing.
+    The agent will analyze your procurement data and return findings and recommendations.
+  </p>
+  <form method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="form-group">
+      <label for="run_type">Analysis Type</label>
+      <select class="form-control" id="run_type" name="run_type">
+        <option value="analyze">Full Spend Analysis</option>
+        <option value="recommend">Savings Recommendations</option>
+        <option value="validate">Data Validation</option>
+        <option value="enrich">Data Enrichment</option>
+      </select>
+    </div>
+    <p style="font-size:12px;color:var(--color-text-muted);margin-bottom:16px">
+      This will send up to 500 recent spend records plus supplier and contract data to the Kindo agent.
+    </p>
+    <button type="submit" class="btn btn-primary">Run Analysis</button>
+    <a href="{{ url_for('analysis.analysis_list') }}" class="btn" style="margin-left:8px">Cancel</a>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "layouts/base.html" %}
+{% block title %}Suppliers{% endblock %}
+{% block page_title %}Suppliers{% endblock %}
+
+{% block help_title %}Suppliers Help{% endblock %}
+{% block help_content %}
+<h3>What is this page?</h3>
+<p>Manage your supplier base. Add suppliers, categorize them, and track their status for consolidation analysis.</p>
+<h3>Supplier consolidation</h3>
+<p>Use the Analysis module to identify suppliers that provide overlapping goods/services. Consolidating to fewer suppliers increases leverage and reduces administrative overhead.</p>
+{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+  <div></div>
+  <a href="{{ url_for('suppliers.supplier_add') }}" class="btn btn-primary">+ Add Supplier</a>
+</div>
+
+{% if suppliers %}
+<div class="card">
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Name</th><th>Category</th><th>Contact Email</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>
+      {% for s in suppliers %}
+      <tr>
+        <td><strong>{{ s.name }}</strong></td>
+        <td>{{ s.category or '—' }}</td>
+        <td>{{ s.contact_email or '—' }}</td>
+        <td><span class="badge {{ 'badge-success' if s.status == 'active' else 'badge-muted' }}">{{ s.status }}</span></td>
+        <td>
+          <a href="{{ url_for('suppliers.supplier_edit', sid=s.id) }}" class="btn btn-sm">Edit</a>
+          <form method="POST" action="{{ url_for('suppliers.supplier_delete', sid=s.id) }}" style="display:inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-sm btn-danger" onclick="return confirm('Delete this supplier?')">Del</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% else %}
+<div class="empty-state">
+  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+  <p>No suppliers added yet.</p>
+  <a href="{{ url_for('suppliers.supplier_add') }}" class="btn btn-primary">Add Your First Supplier</a>
+</div>
+{% endif %}
+{% endblock %}

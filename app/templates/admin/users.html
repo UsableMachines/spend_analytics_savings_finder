@@ -1,0 +1,53 @@
+{% extends "layouts/base.html" %}
+{% block title %}Admin — User Management{% endblock %}
+{% block page_title %}User Management{% endblock %}
+
+{% block help_title %}Admin Help{% endblock %}
+{% block help_content %}
+<h3>What is this page?</h3>
+<p>Manage users within your organization. Assign roles, activate/deactivate accounts, and reset passwords.</p>
+<h3>Roles</h3>
+<ul>
+  <li><strong>Admin</strong> — full access including user management and tenant settings.</li>
+  <li><strong>Analyst</strong> — can add/edit spend records, suppliers, contracts, and run analyses.</li>
+  <li><strong>Viewer</strong> — read-only access to dashboards and reports.</li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+  <div></div>
+  <a href="{{ url_for('admin.tenant_settings') }}" class="btn">Organization Settings</a>
+</div>
+
+<div class="card">
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Username</th><th>Email</th><th>Role</th><th>Active</th><th>Created</th><th>Actions</th></tr></thead>
+      <tbody>
+      {% for u in users %}
+      <tr>
+        <td><strong>{{ u.username }}</strong></td>
+        <td>{{ u.email }}</td>
+        <td><span class="badge badge-info">{{ u.role_name }}</span></td>
+        <td>
+          {% if u.is_active %}<span class="badge badge-success">Active</span>
+          {% else %}<span class="badge badge-muted">Inactive</span>{% endif %}
+        </td>
+        <td>{{ u.created_at.strftime('%Y-%m-%d') if u.created_at else '—' }}</td>
+        <td>
+          <a href="{{ url_for('admin.user_edit', uid=u.id) }}" class="btn btn-sm">Edit</a>
+          {% if u.id != current_user.id %}
+          <form method="POST" action="{{ url_for('admin.user_toggle', uid=u.id) }}" style="display:inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-sm {{ 'btn-danger' if u.is_active else '' }}">{{ 'Deactivate' if u.is_active else 'Activate' }}</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

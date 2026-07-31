@@ -1,0 +1,85 @@
+{% extends "layouts/base.html" %}
+{% block title %}Getting Started{% endblock %}
+{% block page_title %}Getting Started{% endblock %}
+
+{% block help_title %}Getting Started Help{% endblock %}
+{% block help_content %}
+<h3>What is this page?</h3>
+<p>A step-by-step guide to setting up and using the Spend Analytics Savings Finder application.</p>
+{% endblock %}
+
+{% block content %}
+<div class="quick-nav">
+  <a href="#step1">Overview</a>
+  <a href="#step2">Prerequisites</a>
+  <a href="#step3">Add Suppliers</a>
+  <a href="#step4">Add Contracts</a>
+  <a href="#step5">Record Spend</a>
+  <a href="#step6">Run Analysis</a>
+  <a href="#step7">Next Steps</a>
+</div>
+
+<div class="gs-steps">
+  <div class="gs-step" id="step1">
+    <div class="gs-number">1</div>
+    <div class="gs-body">
+      <h3>What is Spend Analytics Savings Finder?</h3>
+      <p>This application analyzes your procurement spend to uncover savings opportunities, supplier consolidation candidates, contract leakage, and maverick purchasing patterns. It integrates with a Kindo AI agent to provide intelligent, data-driven recommendations.</p>
+    </div>
+  </div>
+
+  <div class="gs-step" id="step2">
+    <div class="gs-number">2</div>
+    <div class="gs-body">
+      <h3>Prerequisites</h3>
+      <p>Before you begin, ensure you have:</p>
+      <ul style="margin-top:8px;padding-left:20px;font-size:13px;">
+        <li>An admin account (default: <code>admin</code> / <code>admin</code> — change the password immediately)</li>
+        <li>Your procurement spend data (CSV or manual entry)</li>
+        <li>For AI analysis: <code>KINDO_API_TOKEN</code> and <code>KINDO_AGENT_ID</code> environment variables configured</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="gs-step" id="step3">
+    <div class="gs-number">3</div>
+    <div class="gs-body">
+      <h3>Add Your Suppliers</h3>
+      <p>Navigate to <strong>Suppliers</strong> in the sidebar and add your vendor base. Categorize each supplier (IT, Office Supplies, Professional Services, etc.) to enable category-level analysis.</p>
+    </div>
+  </div>
+
+  <div class="gs-step" id="step4">
+    <div class="gs-number">4</div>
+    <div class="gs-body">
+      <h3>Set Up Contracts</h3>
+      <p>Go to <strong>Contracts</strong> and enter your active agreements. Include start/end dates and total values. Linking spend to contracts enables the AI to detect contract leakage — spend that occurs outside negotiated terms.</p>
+    </div>
+  </div>
+
+  <div class="gs-step" id="step5">
+    <div class="gs-number">5</div>
+    <div class="gs-body">
+      <h3>Record Your Spend</h3>
+      <p>Add spend records individually via <strong>Spend Records → Add</strong>, or bulk import via CSV using the API endpoint <code>POST /api/spend/import</code>. Flag maverick purchases to track off-contract spending.</p>
+      <p style="margin-top:8px"><strong>CSV format:</strong> supplier, description, amount, category, date, po_number, department, is_maverick</p>
+    </div>
+  </div>
+
+  <div class="gs-step" id="step6">
+    <div class="gs-number">6</div>
+    <div class="gs-body">
+      <h3>Run AI Analysis</h3>
+      <p>Go to <strong>Analysis → New Analysis</strong>. Choose an analysis type (Full Analysis, Recommendations, Validation, or Enrichment). The Kindo AI agent will process your data and return findings with actionable recommendations.</p>
+    </div>
+  </div>
+
+  <div class="gs-step" id="step7">
+    <div class="gs-number">7</div>
+    <div class="gs-body">
+      <h3>Next Steps</h3>
+      <p>Review the Dashboard regularly for trends. Prioritize high-severity findings. Use the Admin panel to add team members with appropriate roles (Analyst for data entry, Viewer for read-only access). Re-run analyses periodically as new spend data is recorded.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

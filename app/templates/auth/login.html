@@ -1,0 +1,24 @@
+{% extends "layouts/base.html" %}
+{% block body_class %}page-login{% endblock %}
+{% block title %}Log In{% endblock %}
+{% block content_public %}
+<div class="auth-card">
+  <h1>Savings Finder</h1>
+  <p style="text-align:center;color:var(--color-text-muted);margin-bottom:24px;font-size:13px;">Spend analytics &amp; procurement savings</p>
+  <form method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="form-group">
+      <label for="username">Username</label>
+      <input type="text" class="form-control" id="username" name="username" required autofocus>
+    </div>
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input type="password" class="form-control" id="password" name="password" required>
+    </div>
+    <button type="submit" class="btn btn-primary" style="width:100%">Log In</button>
+    <div class="auth-footer">
+      Don't have an account? <a href="{{ url_for('auth.register') }}">Register</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends "layouts/base.html" %}
+{% block title %}Analysis #{{ run.id }}{% endblock %}
+{% block page_title %}Analysis #{{ run.id }} — {{ run.run_type|title }}{% endblock %}
+
+{% block help_title %}Analysis Detail Help{% endblock %}
+{% block help_content %}
+<h3>What is this page?</h3>
+<p>Detailed results from an AI analysis run. Review the summary, findings, and recommendations.</p>
+<h3>Understanding the results</h3>
+<ul>
+  <li><strong>Score</strong> — overall score (0–100) from the AI agent.</li>
+  <li><strong>Risk Level</strong> — severity classification of the findings.</li>
+  <li><strong>Findings</strong> — specific issues discovered in your spend data.</li>
+  <li><strong>Recommendations</strong> — prioritized actions to realize savings.</li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="analysis-summary">
+  <div class="stat-card">
+    <div class="stat-label">Status</div>
+    <div class="stat-value"><span class="badge {{ 'badge-success' if run.status == 'completed' else 'badge-danger' }}">{{ run.status }}</span></div>
+  </div>
+  {% if run.score is not none %}
+  <div class="stat-card">
+    <div class="stat-label">Score</div>
+    <div class="stat-value">{{ "%.1f"|format(run.score) }}</div>
+    <div class="score-bar">
+      <div class="score-fill" style="width:{{ run.score }}%;background:{{ 'var(--color-danger)' if run.score < 40 else ('var(--color-warning)' if run.score < 70 else 'var(--color-secondary)') }}"></div>
+    </div>
+  </div>
+  {% endif %}
+  {% if run.risk_level %}
+  <div class="stat-card">
+    <div class="stat-label">Risk Level</div>
+    <div class="stat-value"><span class="badge sev-{{ run.risk_level }}">{{ run.risk_level }}</span></div>
+  </div>
+  {% endif %}
+  <div class="stat-card">
+    <div class="stat-label">Run Date</div>
+    <div class="stat-value" style="font-size:16px">{{ run.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+  </div>
+</div>
+
+{% if run.summary %}
+<div class="card" style="margin-bottom:20px">
+  <div class="card-header"><h2>Summary</h2></div>
+  <p style="font-size:14px;line-height:1.7">{{ run.summary }}</p>
+</div>
+{% endif %}
+
+{% set findings = run.findings.all() %}
+{% if findings %}
+<div class="card" style="margin-bottom:20px">
+  <div class="card-header"><h2>Findings ({{ findings|length }})</h2></div>
+  {% for f in findings %}
+  <div class="finding-card">
+    <div class="finding-header">
+      <strong>{{ f.category or 'Finding' }}</strong>
+      {% if f.severity %}<span class="badge sev-{{ f.severity }}">{{ f.severity }}</span>{% endif %}
+    </div>
+    <div class="finding-desc">{{ f.description }}</div>
+    {% if f.evidence %}
+    <div class="finding-evidence">
+      {% set ev = f.evidence %}
+      {% if ev.startswith('[') %}
+        {% for item in ev|tojson %}{{ item }}{% if not loop.last %}, {% endif %}{% endfor %}
+      {% else %}
+        {{ ev }}
+      {% endif %}
+    </div>
+    {% endif %}
+    {% if f.recommendation %}
+    <div class="finding-rec">💡 {{ f.recommendation }}</div>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if result.get('recommendations') %}
+<div class="card" style="margin-bottom:20px">
+  <div class="card-header"><h2>Recommendations</h2></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Priority</th><th>Action</th><th>Owner</th><th>Rationale</th></tr></thead>
+      <tbody>
+      {% for rec in result['recommendations'] %}
+      <tr>
+        <td><span class="badge {{ 'badge-danger' if rec.priority == 'P1' else ('badge-warning' if rec.priority == 'P2' else 'badge-info') }}">{{ rec.priority }}</span></td>
+        <td>{{ rec.action }}</td>
+        <td>{{ rec.owner_role or '—' }}</td>
+        <td style="font-size:12px;color:var(--color-text-muted)">{{ rec.rationale }}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<a href="{{ url_for('analysis.analysis_list') }}" class="btn">← Back to Analyses</a>
+{% endblock %}

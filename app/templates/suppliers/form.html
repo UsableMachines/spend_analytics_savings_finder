@@ -1,0 +1,37 @@
+{% extends "layouts/base.html" %}
+{% block title %}{{ "Edit" if supplier else "Add" }} Supplier{% endblock %}
+{% block page_title %}{{ "Edit" if supplier else "Add" }} Supplier{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:600px">
+  <form method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="form-group">
+      <label for="name">Supplier Name *</label>
+      <input type="text" class="form-control" id="name" name="name" value="{{ supplier.name if supplier else '' }}" required>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="category">Category</label>
+        <input type="text" class="form-control" id="category" name="category" value="{{ supplier.category if supplier else '' }}">
+      </div>
+      <div class="form-group">
+        <label for="status">Status</label>
+        <select class="form-control" id="status" name="status">
+          <option value="active" {{ 'selected' if not supplier or supplier.status == 'active' }}>Active</option>
+          <option value="inactive" {{ 'selected' if supplier and supplier.status == 'inactive' }}>Inactive</option>
+          <option value="pending" {{ 'selected' if supplier and supplier.status == 'pending' }}>Pending</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="contact_email">Contact Email</label>
+      <input type="email" class="form-control" id="contact_email" name="contact_email" value="{{ supplier.contact_email if supplier else '' }}">
+    </div>
+    <div style="display:flex;gap:8px;margin-top:20px">
+      <button type="submit" class="btn btn-primary">{{ "Update" if supplier else "Add Supplier" }}</button>
+      <a href="{{ url_for('suppliers.supplier_list') }}" class="btn">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

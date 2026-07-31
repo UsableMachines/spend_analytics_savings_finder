@@ -1,0 +1,23 @@
+{% extends "layouts/base.html" %}
+{% block title %}Organization Settings{% endblock %}
+{% block page_title %}Organization Settings{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:600px">
+  <form method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="form-group">
+      <label for="name">Organization Name</label>
+      <input type="text" class="form-control" id="name" name="name" value="{{ tenant.name }}">
+    </div>
+    <div class="form-group">
+      <label>Slug</label>
+      <input type="text" class="form-control" value="{{ tenant.slug }}" disabled>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:20px">
+      <button type="submit" class="btn btn-primary">Save</button>
+      <a href="{{ url_for('admin.admin_home') }}" class="btn">Back</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
